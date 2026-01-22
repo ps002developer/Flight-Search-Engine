@@ -64,7 +64,7 @@ export default function SearchForm() {
   };
 
   return (
-    <Card className="mb-10 shadow-xl border-0 overflow-visible bg-white/50 backdrop-blur-sm w-full max-w-6xl mx-auto">
+    <Card className="mb-10 shadow-xl border-0 overflow-visible bg-white/50 backdrop-blur-sm w-full mx-auto">
       <CardContent className="p-4 sm:p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
           
