@@ -1,0 +1,82 @@
+import { FlightOffer } from "@/types";
+
+export const MOCK_FLIGHTS: FlightOffer[] = [
+  {
+    type: "flight-offer",
+    id: "1",
+    source: "MOCK",
+    instantTicketingRequired: false,
+    nonHomogeneous: false,
+    oneWay: false,
+    lastTicketingDate: "2024-12-30",
+    numberOfBookableSeats: 9,
+    itineraries: [
+      {
+        duration: "PT2H30M",
+        segments: [
+          {
+            departure: { iataCode: "LHR", at: "2024-12-25T10:00:00", terminal: "5" },
+            arrival: { iataCode: "CDG", at: "2024-12-25T13:30:00", terminal: "2E" },
+            carrierCode: "BA",
+            number: "306",
+            aircraft: { code: "320" },
+            operating: { carrierCode: "BA" },
+            duration: "PT1H30M",
+            id: "1",
+            numberOfStops: 0,
+            blacklistedInEU: false,
+          },
+        ],
+      },
+    ],
+    price: { currency: "USD", total: "250.00", base: "200.00", fees: [], grandTotal: "250.00" },
+    pricingOptions: { fareType: ["PUBLISHED"], includedCheckedBagsOnly: true },
+    validatingAirlineCodes: ["BA"],
+    travelerPricings: [],
+  },
+  {
+    type: "flight-offer",
+    id: "2",
+    source: "MOCK",
+    instantTicketingRequired: false,
+    nonHomogeneous: false,
+    oneWay: false,
+    lastTicketingDate: "2024-12-30",
+    numberOfBookableSeats: 5,
+    itineraries: [
+      {
+        duration: "PT4H15M",
+        segments: [
+          {
+            departure: { iataCode: "LHR", at: "2024-12-25T08:00:00", terminal: "2" },
+            arrival: { iataCode: "FRA", at: "2024-12-25T10:45:00", terminal: "1" },
+            carrierCode: "LH",
+            number: "901",
+            aircraft: { code: "32N" },
+            operating: { carrierCode: "LH" },
+            duration: "PT1H45M",
+            id: "1",
+            numberOfStops: 0,
+            blacklistedInEU: false,
+          },
+          {
+            departure: { iataCode: "FRA", at: "2024-12-25T12:00:00", terminal: "1" },
+            arrival: { iataCode: "CDG", at: "2024-12-25T13:15:00", terminal: "1" },
+            carrierCode: "LH",
+            number: "1034",
+            aircraft: { code: "320" },
+            operating: { carrierCode: "LH" },
+            duration: "PT1H15M",
+            id: "2",
+            numberOfStops: 0,
+            blacklistedInEU: false,
+          },
+        ],
+      },
+    ],
+    price: { currency: "USD", total: "180.00", base: "150.00", fees: [], grandTotal: "180.00" },
+    pricingOptions: { fareType: ["PUBLISHED"], includedCheckedBagsOnly: true },
+    validatingAirlineCodes: ["LH"],
+    travelerPricings: [],
+  },
+];

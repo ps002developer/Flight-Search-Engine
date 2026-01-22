@@ -61,7 +61,7 @@ export interface Price {
   currency: string;
   total: string;
   base: string;
-  fees: Fee[];
+  fees?: Fee[];
   grandTotal: string;
 }
 
@@ -88,8 +88,14 @@ export interface FareDetailsBySegment {
   cabin: string;
   fareBasis: string;
   class: string;
-  includedCheckedBags: {
-    weight: number;
-    weightUnit: string;
+  includedCheckedBags?: {
+    quantity?: number;
+    weight?: number;
+    weightUnit?: string;
+  };
+  includedCabinBags?: {
+    quantity?: number;
+    weight?: number;
+    weightUnit?: string;
   };
 }

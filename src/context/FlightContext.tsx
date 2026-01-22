@@ -14,7 +14,16 @@ interface FlightContextType {
 
   filteredFlights: FlightOffer[];
   isLoading: boolean;
-  searchFlights: (params: { origin: string; destination: string; date: string; returnDate?: string; adults?: string }) => Promise<void>;
+  searchFlights: (params: { 
+    origin: string; 
+    destination: string; 
+    date: string; 
+    returnDate?: string; 
+    adults?: string;
+    children?: string;
+    infants?: string;
+    travelClass?: string;
+  }) => Promise<void>;
 
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
@@ -40,7 +49,16 @@ export function FlightProvider({ children }: { children: ReactNode }) {
   const [maxPriceResult, setMaxPriceResult] = useState(10000);
 
 
-  const searchFlights = async (params: { origin: string; destination: string; date: string; returnDate?: string; adults?: string }) => {
+  const searchFlights = async (params: { 
+    origin: string; 
+    destination: string; 
+    date: string; 
+    returnDate?: string; 
+    adults?: string;
+    children?: string;
+    infants?: string;
+    travelClass?: string;
+  }) => {
     setIsLoading(true);
     try {
       const searchParams = new URLSearchParams();
@@ -49,6 +67,9 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       searchParams.set("date", params.date);
       if (params.returnDate) searchParams.set("returnDate", params.returnDate);
       if (params.adults) searchParams.set("adults", params.adults);
+      if (params.children) searchParams.set("children", params.children);
+      if (params.infants) searchParams.set("infants", params.infants);
+      if (params.travelClass) searchParams.set("travelClass", params.travelClass);
       
       const res = await fetch(`/api/search?${searchParams.toString()}`);
       const responseBody = await res.json();

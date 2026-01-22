@@ -1,15 +1,15 @@
 import React from "react";
 import { FlightOffer } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { format, parseISO } from "date-fns";
-import { ArrowRight, Clock } from "lucide-react";
+import { format, parseISO, differenceInMinutes } from "date-fns";
+import { Plane, ChevronDown, Clock, MoveRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FlightCardProps {
   flight: FlightOffer;
 }
 
 export default function FlightCard({ flight }: FlightCardProps) {
-
+  const [isOpen, setIsOpen] = React.useState(false);
   const itinerary = flight.itineraries[0];
   const firstSegment = itinerary.segments[0];
   const lastSegment = itinerary.segments[itinerary.segments.length - 1];
@@ -17,83 +17,194 @@ export default function FlightCard({ flight }: FlightCardProps) {
   const departureTime = parseISO(firstSegment.departure.at);
   const arrivalTime = parseISO(lastSegment.arrival.at);
 
-
   const formatDuration = (pt: string) => {
     const hours = pt.match(/(\d+)H/)?.[1];
     const minutes = pt.match(/(\d+)M/)?.[1];
-    let result = "";
-    if (hours) result += `${hours}h `;
-    if (minutes) result += `${minutes}m`;
-    return result.trim() || pt.replace("PT", "").toLowerCase();
+    if (!hours && !minutes) return "0m";
+    return `${hours ? hours + "h " : ""}${minutes ? minutes + "m" : ""}`.trim();
   };
 
   const durationStr = formatDuration(itinerary.duration);
   const stops = itinerary.segments.length - 1;
 
+  const carrierCode = firstSegment.carrierCode;
+  const flightNumber = `${carrierCode} ${firstSegment.number}`;
+
   return (
-    <Card className="mb-4 hover:shadow-lg transition-all cursor-pointer border-slate-200 overflow-hidden group">
-      <CardContent className="p-0">
-        <div className="flex flex-col sm:flex-row">
+    <div className="group mb-4 w-full bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      
+      {/* --- Main Card Header (Clickable) --- */}
+      <div
+        className="cursor-pointer transition-colors hover:bg-slate-50/50"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4 items-center">
           
-          <div className="flex-1 p-5">
-            <div className="flex items-start justify-between mb-4">
-                 <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-slate-100 rounded flex items-center justify-center text-xs font-bold text-slate-700">
-                        {flight.validatingAirlineCodes[0]}
-                    </div>
-                    <div>
-                        <span className="text-sm font-semibold text-slate-900 block leading-tight">{flight.validatingAirlineCodes[0]} Airlines</span>
-                        <span className="text-xs text-slate-500">Flight {firstSegment.number}</span>
-                    </div>
-                 </div>
-                 {stops === 0 && <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Direct</span>}
+          <div className="md:col-span-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs shadow-sm">
+              {carrierCode}
             </div>
-
-            <div className="flex items-center justify-between gap-4">
-                <div className="text-center sm:text-left min-w-[60px]">
-                   <div className="text-2xl font-bold text-slate-900">{format(departureTime, "HH:mm")}</div>
-                   <div className="text-sm text-slate-500 font-medium">{firstSegment.departure.iataCode}</div>
-                </div>
-
-                <div className="flex-1 flex flex-col items-center px-4">
-                   <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {durationStr}
-                   </div>
-                   <div className="w-full h-px bg-slate-200 relative flex items-center justify-center">
-                       <div className="absolute right-0 -mt-[3px]">
-                          <ArrowRight className="h-3 w-3 text-slate-300" />
-                       </div>
-                   </div>
-                   <div className="text-xs text-slate-400 mt-1">
-                     {stops === 0 ? "Non-stop" : `${stops} stop${stops > 1 ? "s" : ""}`}
-                   </div>
-                </div>
-
-                <div className="text-center sm:text-right min-w-[60px]">
-                   <div className="text-2xl font-bold text-slate-900">{format(arrivalTime, "HH:mm")}</div>
-                   <div className="text-sm text-slate-500 font-medium">{lastSegment.arrival.iataCode}</div>
-                </div>
+            <div>
+              <p className="font-semibold text-slate-900">{flightNumber}</p>
+              <p className="text-xs text-slate-500 font-medium">Economy • Boeing 737</p>
             </div>
           </div>
 
+          <div className="md:col-span-6 flex flex-row items-center justify-between gap-2 md:gap-6">
+            <div className="text-left min-w-[60px]">
+              <p className="text-2xl font-bold text-slate-900 tabular-nums leading-none">
+                {format(departureTime, "HH:mm")}
+              </p>
+              <p className="text-sm font-medium text-slate-500 mt-1">
+                {firstSegment.departure.iataCode}
+              </p>
+            </div>
 
-          <div className="border-t sm:border-t-0 sm:border-l border-slate-100 bg-slate-50/50 p-5 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-3 min-w-[150px]">
-             <div className="text-left sm:text-right">
-                <div className="text-xs text-slate-500 mb-0.5">Price per adult</div>
-                <div className="text-2xl font-bold text-blue-700">
-                  {flight.price.currency === "EUR" ? "€" : "$"}
-                  {flight.price.grandTotal}
-                </div>
-             </div>
-             
-             <button className="px-6 py-2 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 transition-colors text-sm w-auto sm:w-full">
-               Select
-             </button>
+            <div className="flex flex-col items-center flex-1 px-2">
+              <p className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {durationStr}
+              </p>
+              <div className="w-full h-px bg-slate-300 relative flex items-center justify-center">
+                <div className="absolute left-0 w-1.5 h-1.5 rounded-full bg-slate-300" />
+                <div className="absolute right-0 w-1.5 h-1.5 rounded-full bg-slate-300" />
+              </div>
+              <p className={cn(
+                "text-xs font-medium mt-3 px-2 py-0.5 rounded-full",
+                stops === 0 
+                  ? "text-emerald-600 bg-emerald-50" 
+                  : "text-amber-600 bg-amber-50"
+              )}>
+                {stops === 0 ? "Direct" : `${stops} Stop${stops > 1 ? "s" : ""}`}
+              </p>
+            </div>
+
+            <div className="text-right min-w-[60px]">
+              <p className="text-2xl font-bold text-slate-900 tabular-nums leading-none">
+                {format(arrivalTime, "HH:mm")}
+              </p>
+              <p className="text-sm font-medium text-slate-500 mt-1">
+                {lastSegment.arrival.iataCode}
+              </p>
+            </div>
+          </div>
+
+          <div className="md:col-span-3 flex md:flex-col flex-row items-center md:items-end justify-between md:justify-center gap-1 border-t md:border-t-0 border-slate-100 pt-4 md:pt-0 mt-2 md:mt-0">
+            <div className="text-left md:text-right">
+              <p className="text-xs text-slate-500 font-medium">Total Price</p>
+              <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                {flight.price.currency === "EUR" ? "€" : "$"}{flight.price.grandTotal}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 mt-0 md:mt-2">
+              <button 
+                onClick={(e) => {
+                   e.stopPropagation();
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition-colors shadow-sm hover:shadow active:scale-95"
+              >
+                Select
+              </button>
+              <div className="md:hidden text-slate-400">
+                <ChevronDown className={cn("w-5 h-5 transition-transform", isOpen && "rotate-180")} />
+              </div>
+            </div>
           </div>
 
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="hidden md:flex justify-center pb-2">
+            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-500 transition-colors">
+                 {isOpen ? "Hide Details" : "Flight Details"}
+                 <ChevronDown className={cn("w-3 h-3 transition-transform", isOpen && "rotate-180")} />
+            </div>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="border-t border-slate-200 bg-slate-50/50 p-5 md:p-8 animate-in slide-in-from-top-1 fade-in duration-200">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Itinerary Breakdown</h4>
+
+          <div className="relative">
+             {itinerary.segments.map((segment, idx) => {
+                const dep = parseISO(segment.departure.at);
+                const arr = parseISO(segment.arrival.at);
+                const isLast = idx === itinerary.segments.length - 1;
+                
+                // Calculate next flight wait time (layover) if not last
+                let layoverTime = "";
+                if (!isLast) {
+                    const nextDep = parseISO(itinerary.segments[idx + 1].departure.at);
+                    const diffMins = differenceInMinutes(nextDep, arr);
+                    const hrs = Math.floor(diffMins / 60);
+                    const mins = diffMins % 60;
+                    layoverTime = `${hrs}h ${mins}m`;
+                }
+
+                return (
+                  <div key={segment.id} className="relative flex gap-4 md:gap-8 pb-8 last:pb-0">
+                    
+                    {/* Time Column */}
+                    <div className="flex flex-col text-right w-16 md:w-20 pt-1">
+                       <span className="font-bold text-slate-900 text-sm md:text-base">{format(dep, "HH:mm")}</span>
+                       <span className="text-xs text-slate-400 font-medium tabular-nums mt-auto pb-1">{formatDuration(segment.duration)}</span>
+                       <span className="font-bold text-slate-400 text-sm md:text-base">{format(arr, "HH:mm")}</span>
+                    </div>
+
+                    {/* Timeline Line Column */}
+                    <div className="flex flex-col items-center relative">
+                        <div className="w-3.5 h-3.5 rounded-full border-[3px] border-white bg-slate-900 shadow-sm z-10 mt-1.5"></div>
+                        
+                        <div className="w-0.5 flex-grow bg-slate-300 my-1 relative"></div>
+
+                        <div className={cn(
+                            "w-3.5 h-3.5 rounded-full border-[3px] border-white z-10 mb-1.5",
+                            !isLast ? "bg-white border-slate-400 border-[2px]" : "bg-slate-900"
+                        )}></div>
+                    </div>
+
+                    {/* Content Column */}
+                    <div className="flex-1 pt-1 pb-4">
+                        {/* Departure Info */}
+                        <div className="flex items-baseline gap-2 mb-6">
+                            <span className="font-semibold text-slate-900">{segment.departure.iataCode}</span>
+                            <span className="text-sm text-slate-500">{segment.departure.terminal ? `Terminal ${segment.departure.terminal}` : ""}</span>
+                        </div>
+
+                        {/* Flight Card */}
+                        <div className="bg-white p-3 md:p-4 rounded-lg border border-slate-200 shadow-sm mb-6 max-w-lg">
+                           <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center">
+                                    <span className="text-xs font-bold text-slate-600">{segment.carrierCode}</span>
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-semibold text-slate-900">{segment.carrierCode} {segment.number}</p>
+                                    <p className="text-xs text-slate-500">Boeing {segment.aircraft.code} • Economy</p>
+                                </div>
+                           </div>
+                        </div>
+
+                        {/* Arrival Info */}
+                        <div className="flex items-baseline gap-2">
+                             <span className="font-semibold text-slate-900">{segment.arrival.iataCode}</span>
+                             <span className="text-sm text-slate-500">{segment.arrival.terminal ? `Terminal ${segment.arrival.terminal}` : ""}</span>
+                        </div>
+
+                        {/* Layover Alert */}
+                        {!isLast && (
+                           <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-amber-50 border border-amber-100 text-amber-800 text-xs font-medium">
+                              <Clock className="w-3.5 h-3.5" />
+                              Layover in {segment.arrival.iataCode}: <span className="font-bold">{layoverTime}</span>
+                           </div>
+                        )}
+                    </div>
+
+                  </div>
+                )
+             })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
